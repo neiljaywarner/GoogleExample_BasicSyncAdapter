@@ -28,10 +28,17 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.IdRes;
 import android.util.Log;
 
+import com.example.android.network.sync.basicsyncadapter.data.DTService;
+import com.example.android.network.sync.basicsyncadapter.data.Feed;
+import com.example.android.network.sync.basicsyncadapter.data.Item;
 import com.example.android.network.sync.basicsyncadapter.net.FeedParser;
 import com.example.android.network.sync.basicsyncadapter.provider.FeedContract;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -44,6 +51,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Define a sync adapter for the app.
@@ -130,48 +144,21 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Beginning network synchronization");
+        Call<Feed> call = getCall();
         try {
-            final URL location = new URL(FEED_URL);
-            InputStream stream = null;
+            Response<Feed> feedResponse = call.execute();
+            Feed feed = feedResponse.body();
+            updateLocalFeedData(feed, syncResult);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
+            return;
 
-            try {
-                Log.i(TAG, "Streaming data from network: " + location);
-                stream = downloadUrl(location);
-                updateLocalFeedData(stream, syncResult);
-                // Makes sure that the InputStream is closed after the app is
-                // finished using it.
-            } finally {
-                if (stream != null) {
-                    stream.close();
-                }
-            }
-        } catch (MalformedURLException e) {
-            Log.wtf(TAG, "Feed URL is malformed", e);
-            syncResult.stats.numParseExceptions++;
-            return;
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading from network: " + e.toString());
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "Error parsing feed: " + e.toString());
-            syncResult.stats.numParseExceptions++;
-            return;
-        } catch (ParseException e) {
-            Log.e(TAG, "Error parsing feed: " + e.toString());
-            syncResult.stats.numParseExceptions++;
-            return;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error updating database: " + e.toString());
-            syncResult.databaseError = true;
-            return;
-        } catch (OperationApplicationException e) {
-            Log.e(TAG, "Error updating database: " + e.toString());
-            syncResult.databaseError = true;
-            return;
         }
         Log.i(TAG, "Network synchronization complete");
     }
+
+
 
     /**
      * Read XML from an input stream, storing it into the content provider.
@@ -193,35 +180,32 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
      * (At this point, incoming database only contains missing items.)<br/>
      * 3. For any items remaining in incoming list, ADD to database.
      */
-    public void updateLocalFeedData(final InputStream stream, final SyncResult syncResult)
+    public void updateLocalFeedData(Feed feed, final SyncResult syncResult)
             throws IOException, XmlPullParserException, RemoteException,
             OperationApplicationException, ParseException {
-        final FeedParser feedParser = new FeedParser();
-        final ContentResolver contentResolver = getContext().getContentResolver();
 
-        Log.i(TAG, "Parsing stream as Atom feed");
-        final List<FeedParser.Entry> entries = feedParser.parse(stream);
+        List<Item> entries = feed.getItems();
+
         Log.i(TAG, "Parsing complete. Found " + entries.size() + " entries");
-
 
         ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
 
         // Build hash table of incoming entries
-        HashMap<String, FeedParser.Entry> entryMap = new HashMap<String, FeedParser.Entry>();
-        for (FeedParser.Entry e : entries) {
-            entryMap.put(e.id, e);
+        HashMap<String, Item> entryMap = new HashMap<String, Item>();
+        for (Item e : entries) {
+            entryMap.put(e.getId(), e);
         }
 
 
 
 
         // Add new items
-        for (FeedParser.Entry e : entryMap.values()) {
-            Log.i(TAG, "Scheduling insert: entry_id=" + e.id);
+        for (Item e : entryMap.values()) {
+            Log.i(TAG, "Scheduling insert: entry_id=" + e.getId());
             batch.add(ContentProviderOperation.newInsert(FeedContract.Entry.CONTENT_URI)
-                    .withValue(FeedContract.Entry.COLUMN_NAME_ENTRY_ID, e.id)
-                    .withValue(FeedContract.Entry.COLUMN_NAME_TITLE, e.title)
-                    .withValue(FeedContract.Entry.COLUMN_NAME_LINK, e.link)
+                    .withValue(FeedContract.Entry.COLUMN_NAME_ENTRY_ID, e.getId())
+                    .withValue(FeedContract.Entry.COLUMN_NAME_TITLE, e.getTitle())
+                    .withValue(FeedContract.Entry.COLUMN_NAME_LINK, e.getLink())
                     .build());
             syncResult.stats.numInserts++;
         }
@@ -235,6 +219,8 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         // syncToNetwork=false in the line above to prevent duplicate syncs.
     }
 
+
+
     /**
      * Given a string representation of a URL, sets up a connection and gets an input stream.
      */
@@ -247,5 +233,80 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Starts the query
         conn.connect();
         return conn.getInputStream();
+    }
+
+    /**
+     * get call based on mItemId
+     * @return
+     */
+    public Call<Feed> getCall() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
+        Gson gson = new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create();
+
+        GsonConverterFactory gsonConverterFactory = GsonConverterFactory.create(gson);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DTService.DISCIPLES_TODAY_BASE_URL)
+                .client(client)
+                .addConverterFactory(gsonConverterFactory)
+                .build();
+
+        DTService service = retrofit.create(DTService.class);
+        String moduleId = "";
+        moduleId = "353";
+        return service.listFeed(moduleId);
+
+        /*
+        @IdRes int itemId;
+        if (menuItem == null) {
+            itemId = R.id.nav_highlighted;
+            Log.i(TAG, "getCall() - HIGHLIGHTED");
+        } else {
+            itemId = menuItem.getItemId();
+            Log.i(TAG, "getCall() - MenuItem Title="+ menuItem.getTitle());
+        }
+        */
+        /*
+        @IdRes int itemId = menuItemId;
+        switch (itemId) {
+            case R.id.nav_campus:
+                moduleId = "288";
+                break;
+            case R.id.nav_singles:
+                moduleId = "273";
+                break;
+            case R.id.nav_bible_study:
+                moduleId = "270";
+                break;
+            case R.id.nav_commentary:
+                moduleId = "347";
+                break;
+            case R.id.nav_kingdom_kids:
+                moduleId = "289";
+                break;
+            case R.id.nav_youth_and_family:
+                moduleId = "271";
+                break;
+            case R.id.nav_missions:
+                moduleId = "334";
+                break;
+            case R.id.nav_man_up:
+                moduleId = "272";
+                break;
+            case R.id.nav_specialty_ministries:
+                moduleId = "359";
+                break;
+            case R.id.nav_regional_news:
+                moduleId = "358";
+                break;
+            default:
+                moduleId = "353";
+                */
+       // }
+
     }
 }
