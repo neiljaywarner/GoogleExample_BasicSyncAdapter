@@ -225,8 +225,8 @@ public class FeedProvider extends ContentProvider {
                         FeedContract.Entry._ID + " INTEGER PRIMARY KEY," +
                         FeedContract.Entry.COLUMN_NAME_ENTRY_ID + TYPE_TEXT + COMMA_SEP +
                         FeedContract.Entry.COLUMN_NAME_TITLE    + TYPE_TEXT + COMMA_SEP +
-                        FeedContract.Entry.COLUMN_NAME_LINK + TYPE_TEXT + COMMA_SEP +
-                        FeedContract.Entry.COLUMN_NAME_PUBLISHED + TYPE_INTEGER + ")";
+                        FeedContract.Entry.COLUMN_NAME_LINK + TYPE_TEXT +
+                        ")";
 
         /** SQL statement to drop "entry" table. */
         private static final String SQL_DELETE_ENTRIES =

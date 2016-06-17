@@ -87,15 +87,13 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
             FeedContract.Entry._ID,
             FeedContract.Entry.COLUMN_NAME_ENTRY_ID,
             FeedContract.Entry.COLUMN_NAME_TITLE,
-            FeedContract.Entry.COLUMN_NAME_LINK,
-            FeedContract.Entry.COLUMN_NAME_PUBLISHED};
+            FeedContract.Entry.COLUMN_NAME_LINK};
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
     public static final int COLUMN_ENTRY_ID = 1;
     public static final int COLUMN_TITLE = 2;
     public static final int COLUMN_LINK = 3;
-    public static final int COLUMN_PUBLISHED = 4;
 
     /**
      * Constructor. Obtains handle to content resolver for later use.
@@ -214,57 +212,8 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
             entryMap.put(e.id, e);
         }
 
-        // Get list of all items
-        Log.i(TAG, "Fetching local entries for merge");
-        Uri uri = FeedContract.Entry.CONTENT_URI; // Get all entries
-        Cursor c = contentResolver.query(uri, PROJECTION, null, null, null);
-        assert c != null;
-        Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
 
-        // Find stale data
-        int id;
-        String entryId;
-        String title;
-        String link;
-        long published;
-        while (c.moveToNext()) {
-            syncResult.stats.numEntries++;
-            id = c.getInt(COLUMN_ID);
-            entryId = c.getString(COLUMN_ENTRY_ID);
-            title = c.getString(COLUMN_TITLE);
-            link = c.getString(COLUMN_LINK);
-            published = c.getLong(COLUMN_PUBLISHED);
-            FeedParser.Entry match = entryMap.get(entryId);
-            if (match != null) {
-                // Entry exists. Remove from entry map to prevent insert later.
-                entryMap.remove(entryId);
-                // Check to see if the entry needs to be updated
-                Uri existingUri = FeedContract.Entry.CONTENT_URI.buildUpon()
-                        .appendPath(Integer.toString(id)).build();
-                if ((match.title != null && !match.title.equals(title)) ||
-                        (match.link != null && !match.link.equals(link)) ||
-                        (match.published != published)) {
-                    // Update existing record
-                    Log.i(TAG, "Scheduling update: " + existingUri);
-                    batch.add(ContentProviderOperation.newUpdate(existingUri)
-                            .withValue(FeedContract.Entry.COLUMN_NAME_TITLE, title)
-                            .withValue(FeedContract.Entry.COLUMN_NAME_LINK, link)
-                            .withValue(FeedContract.Entry.COLUMN_NAME_PUBLISHED, published)
-                            .build());
-                    syncResult.stats.numUpdates++;
-                } else {
-                    Log.i(TAG, "No action: " + existingUri);
-                }
-            } else {
-                // Entry doesn't exist. Remove it from the database.
-                Uri deleteUri = FeedContract.Entry.CONTENT_URI.buildUpon()
-                        .appendPath(Integer.toString(id)).build();
-                Log.i(TAG, "Scheduling delete: " + deleteUri);
-                batch.add(ContentProviderOperation.newDelete(deleteUri).build());
-                syncResult.stats.numDeletes++;
-            }
-        }
-        c.close();
+
 
         // Add new items
         for (FeedParser.Entry e : entryMap.values()) {
@@ -273,7 +222,6 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .withValue(FeedContract.Entry.COLUMN_NAME_ENTRY_ID, e.id)
                     .withValue(FeedContract.Entry.COLUMN_NAME_TITLE, e.title)
                     .withValue(FeedContract.Entry.COLUMN_NAME_LINK, e.link)
-                    .withValue(FeedContract.Entry.COLUMN_NAME_PUBLISHED, e.published)
                     .build());
             syncResult.stats.numInserts++;
         }

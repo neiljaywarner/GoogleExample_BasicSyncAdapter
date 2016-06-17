@@ -84,6 +84,5 @@ public class FeedContract {
         /**
          * Date article was published.
          */
-        public static final String COLUMN_NAME_PUBLISHED = "published";
     }
 }

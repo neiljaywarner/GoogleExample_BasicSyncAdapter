@@ -91,7 +91,6 @@ public class EntryListFragment extends ListFragment
             FeedContract.Entry._ID,
             FeedContract.Entry.COLUMN_NAME_TITLE,
             FeedContract.Entry.COLUMN_NAME_LINK,
-            FeedContract.Entry.COLUMN_NAME_PUBLISHED
     };
 
     // Column indexes. The index of a column in the Cursor is the same as its relative position in
@@ -110,7 +109,7 @@ public class EntryListFragment extends ListFragment
      */
     private static final String[] FROM_COLUMNS = new String[]{
             FeedContract.Entry.COLUMN_NAME_TITLE,
-            FeedContract.Entry.COLUMN_NAME_PUBLISHED
+            FeedContract.Entry.COLUMN_NAME_LINK
     };
 
     /**
@@ -161,6 +160,8 @@ public class EntryListFragment extends ListFragment
         mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int i) {
+                return false;
+                /*
                 if (i == COLUMN_PUBLISHED) {
                     // Convert timestamp to human-readable date
                     Time t = new Time();
@@ -171,6 +172,7 @@ public class EntryListFragment extends ListFragment
                     // Let SimpleCursorAdapter handle other fields automatically
                     return false;
                 }
+                */
             }
         });
         setListAdapter(mAdapter);
@@ -215,7 +217,7 @@ public class EntryListFragment extends ListFragment
                 PROJECTION,                // Projection
                 null,                           // Selection
                 null,                           // Selection args
-                FeedContract.Entry.COLUMN_NAME_PUBLISHED + " desc"); // Sort
+                null); // Sort string is optional
     }
 
     /**
