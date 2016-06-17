@@ -1,0 +1,28 @@
+[
+    {
+        "outputFile": "/Users/neil/Desktop/BasicSyncAdapter/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-v11/values-v11.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endLine": 4,
+                    "endColumn": 12,
+                    "endOffset": 187
+                },
+                "from": {
+                    "file": "/Users/neil/Desktop/BasicSyncAdapter/app/src/main/res/values-v11/styles.xml",
+                    "position": {
+                        "startLine": 23,
+                        "startColumn": 4,
+                        "startOffset": 799,
+                        "endLine": 25,
+                        "endColumn": 12,
+                        "endOffset": 931
+                    }
+                }
+            }
+        ]
+    }
+]

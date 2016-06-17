@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<instant-run
+    abi="x86,x86_64"
+    api-level="22"
+    density="xhdpi"
+    format="7"
+    timestamp="88385603366049"
+    token="-2342258876664911519" >
+
+    <task
+        name="javac"
+        duration="2943" />
+    <task
+        name="instant-run-dex"
+        duration="0" />
+    <task
+        name="instant-run-transform"
+        duration="169" />
+    <task
+        name="verifier"
+        duration="17" />
+
+    <artifact
+        location="/Users/neil/Desktop/BasicSyncAdapter/app/build/outputs/apk/app-debug.apk"
+        type="MAIN" />
+
+    <build timestamp="88385603366049" >
+        <artifact
+            location="/Users/neil/Desktop/BasicSyncAdapter/app/build/outputs/apk/app-debug.apk"
+            type="MAIN" />
+    </build>
+
+</instant-run>

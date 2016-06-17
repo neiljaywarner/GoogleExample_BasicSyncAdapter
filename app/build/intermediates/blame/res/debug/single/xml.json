@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/neil/Desktop/BasicSyncAdapter/app/build/intermediates/res/merged/debug/xml/authenticator.xml",
+        "source": "/Users/neil/Desktop/BasicSyncAdapter/app/src/main/res/xml/authenticator.xml"
+    },
+    {
+        "merged": "/Users/neil/Desktop/BasicSyncAdapter/app/build/intermediates/res/merged/debug/xml/syncadapter.xml",
+        "source": "/Users/neil/Desktop/BasicSyncAdapter/app/src/main/res/xml/syncadapter.xml"
+    }
+]

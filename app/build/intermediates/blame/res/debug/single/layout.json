@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/neil/Desktop/BasicSyncAdapter/app/build/intermediates/res/merged/debug/layout/activity_entry_list.xml",
+        "source": "/Users/neil/Desktop/BasicSyncAdapter/app/src/main/res/layout/activity_entry_list.xml"
+    },
+    {
+        "merged": "/Users/neil/Desktop/BasicSyncAdapter/app/build/intermediates/res/merged/debug/layout/actionbar_indeterminate_progress.xml",
+        "source": "/Users/neil/Desktop/BasicSyncAdapter/app/src/main/res/layout/actionbar_indeterminate_progress.xml"
+    }
+]
