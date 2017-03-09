@@ -17,7 +17,7 @@ ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml
 		ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml:2:11-69
 uses-sdk
 ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml:8:5-10:41
-MERGED from [com.android.support:support-v4:23.4.0] /Users/neil/Desktop/BasicSyncAdapter/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.4.0/AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:support-v4:23.4.0] /Users/neil/.android/build-cache/696feeb1518d8facb6cbc1300a7398d362c53b6c/output/AndroidManifest.xml:20:5-43
 	android:targetSdkVersion
 		ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml:10:9-38
 		INJECTED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml
@@ -44,7 +44,7 @@ ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml
 		ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml:19:22-77
 application
 ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml:22:5-82:15
-MERGED from [com.android.support:support-v4:23.4.0] /Users/neil/Desktop/BasicSyncAdapter/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.4.0/AndroidManifest.xml:22:5-20
+MERGED from [com.android.support:support-v4:23.4.0] /Users/neil/.android/build-cache/696feeb1518d8facb6cbc1300a7398d362c53b6c/output/AndroidManifest.xml:22:5-20
 	android:label
 		ADDED from /Users/neil/Desktop/BasicSyncAdapter/app/src/main/AndroidManifest.xml:25:9-41
 	android:allowBackup
